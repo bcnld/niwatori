@@ -1,69 +1,92 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>そんなに怖いか？鶏に犯されるのが</title>
   <style>
     body {
       margin: 0;
-      background-color: black;
       overflow: hidden;
+      background: #222;
+      color: white;
+      font-family: Arial, sans-serif;
+      user-select: none;
+      position: relative;
+      height: 100vh;
     }
-
-    #startButton {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      padding: 20px 40px;
-      font-size: 24px;
+    #score {
+      font-size: 36px;
+      text-align: center;
+      margin: 20px 0;
+      z-index: 10;
+      position: relative;
+    }
+    #clickImg {
+      display: block;
+      margin: 0 auto;
+      width: 200px;
       cursor: pointer;
+      user-select: none;
+      position: relative;
       z-index: 10;
     }
-
-    .img-tile {
+    .falling-img {
       position: absolute;
-      width: 100px;
-      height: 100px;
+      width: 50px;
+      pointer-events: none;
+      user-select: none;
+      opacity: 0.8;
+      animation: fall linear forwards;
+      filter: drop-shadow(0 0 5px cyan);
+    }
+    @keyframes fall {
+      from {
+        top: -60px;
+        opacity: 1;
+        transform: rotate(0deg);
+      }
+      to {
+        top: 110vh;
+        opacity: 0;
+        transform: rotate(360deg);
+      }
     }
   </style>
 </head>
 <body>
 
-  <button id="startButton">スタート</button>
-  <audio id="sound" src="sound.wav"></audio>
+  <div id="score">スコア: 0</div>
+  <img id="clickImg" src="dog.png" alt="クリックする画像" />
+
+  <audio id="clickSound" src="click.wav"></audio>
 
   <script>
-    const button = document.getElementById("startButton");
-    const sound = document.getElementById("sound");
+    const scoreEl = document.getElementById("score");
+    const clickImg = document.getElementById("clickImg");
+    const clickSound = document.getElementById("clickSound");
 
-    button.addEventListener("click", () => {
-      button.style.display = "none";
-      sound.play();
-      fillScreenWithImages();
+    let score = 0;
+
+    clickImg.addEventListener("click", () => {
+      score++;
+      scoreEl.textContent = `スコア: ${score}`;
+      clickSound.currentTime = 0;
+      clickSound.play();
+      createFallingImage();
     });
 
-    function fillScreenWithImages() {
-      const imgSize = 100; // 画像のサイズ（px）
-      const cols = Math.ceil(window.innerWidth / imgSize);
-      const rows = Math.ceil(window.innerHeight / imgSize);
-      let count = 0;
+    function createFallingImage() {
+      const img = document.createElement("img");
+      img.src = "dog.png"; // 落ちる画像もクリック画像と同じにしてます
+      img.className = "falling-img";
+      img.style.left = Math.random() * (window.innerWidth - 50) + "px";
+      img.style.animationDuration = (3 + Math.random() * 2) + "s";
+      document.body.appendChild(img);
 
-      const interval = setInterval(() => {
-        const col = count % cols;
-        const row = Math.floor(count / cols);
-        const img = document.createElement("img");
-        img.src = "dog.png";
-        img.className = "img-tile";
-        img.style.left = `${col * imgSize}px`;
-        img.style.top = `${row * imgSize}px`;
-        document.body.appendChild(img);
-
-        count++;
-        if (count >= cols * rows) {
-          clearInterval(interval);
-        }
-      }, 50); // 画像の表示間隔（ms）
+      // アニメーション終了後に要素を削除
+      img.addEventListener("animationend", () => {
+        img.remove();
+      });
     }
   </script>
 
