@@ -11,9 +11,7 @@
       color: white;
       font-family: Arial, sans-serif;
       user-select: none;
-      position: relative;
       height: 100vh;
-      transition: background-image 0.5s;
     }
     #score {
       font-size: 36px;
@@ -27,8 +25,6 @@
       margin: 0 auto;
       width: 200px;
       cursor: pointer;
-      user-select: none;
-      position: relative;
       z-index: 10;
       transition: transform 0.3s;
     }
@@ -39,7 +35,6 @@
       position: absolute;
       width: 50px;
       pointer-events: none;
-      user-select: none;
       opacity: 0.8;
       animation: fall linear forwards;
       filter: drop-shadow(0 0 5px cyan);
@@ -60,39 +55,79 @@
         transform: rotate(360deg);
       }
     }
+    #shopToggle {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 20;
+      background: #444;
+      padding: 10px;
+      border: none;
+      color: white;
+      cursor: pointer;
+    }
+    #shop {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 300px;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.8);
+      padding: 20px;
+      display: none;
+      flex-direction: column;
+      z-index: 15;
+    }
+    .shop-item {
+      margin: 10px 0;
+      background: #333;
+      padding: 10px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
 
   <div id="score">スコア: 0</div>
   <img id="clickImg" src="dog.png" alt="クリックする画像" />
+  <button id="shopToggle">ショップ</button>
+
+  <div id="shop">
+    <div class="shop-item" onclick="buyUpgrade()">アップグレード (+1点)</div>
+  </div>
 
   <audio id="clickSound" src="pop.wav"></audio>
-  <audio id="feverMusic" src="oppa.wav"></audio>
+  <audio id="feverMusic" src="oppa.wav" loop></audio>
 
   <script>
     const scoreEl = document.getElementById("score");
     const clickImg = document.getElementById("clickImg");
     const clickSound = document.getElementById("clickSound");
     const feverMusic = document.getElementById("feverMusic");
+    const shopToggle = document.getElementById("shopToggle");
+    const shop = document.getElementById("shop");
 
-    let score = 0;
+    let score = parseInt(localStorage.getItem("score")) || 0;
+    let clickPower = parseInt(localStorage.getItem("clickPower")) || 1;
     let isFever = false;
-    let originalImgSrc = "dog.png";
-    let feverImgSrc = "oppa4.jpg";
-    let feverBg = "url('poop.gif')";
-    let normalBg = "#222";
+
+    const originalImgSrc = "dog.png";
+    const feverImgSrc = "oppa4.jpg";
+    const feverBg = "url('poop.gif')";
+
+    updateScore();
 
     clickImg.addEventListener("click", () => {
-      let addedScore = isFever ? 2 : 1;
-      score += addedScore;
-      scoreEl.textContent = `スコア: ${score}`;
+      score += isFever ? clickPower * 2 : clickPower;
+      updateScore();
+      saveData();
       clickSound.currentTime = 0;
       clickSound.play();
       createFallingImage();
 
-      // ランダムでフィーバータイム発動（確率2%）
-      if (!isFever && Math.random() < 0.02) {
+      const feverChance = 0.001 + Math.floor(score / 1000) * 0.001;
+      if (!isFever && Math.random() < feverChance) {
         activateFever();
       }
     });
@@ -112,20 +147,45 @@
       isFever = true;
       document.body.style.backgroundImage = feverBg;
       clickImg.src = feverImgSrc;
+      clickImg.classList.add("fever-effect");
       feverMusic.currentTime = 0;
       feverMusic.play();
-      clickImg.classList.add("fever-effect");
 
-      // フィーバータイムは10秒で終了
       setTimeout(() => {
         isFever = false;
         document.body.style.backgroundImage = "";
         clickImg.src = originalImgSrc;
+        clickImg.classList.remove("fever-effect");
         feverMusic.pause();
         feverMusic.currentTime = 0;
-        clickImg.classList.remove("fever-effect");
       }, 10000);
     }
+
+    function updateScore() {
+      scoreEl.textContent = `スコア: ${score}`;
+    }
+
+    function saveData() {
+      localStorage.setItem("score", score);
+      localStorage.setItem("clickPower", clickPower);
+    }
+
+    function buyUpgrade() {
+      const cost = 50;
+      if (score >= cost) {
+        score -= cost;
+        clickPower += 1;
+        updateScore();
+        saveData();
+        alert("アップグレードしました！ クリックあたり +1 点");
+      } else {
+        alert("スコアが足りません！");
+      }
+    }
+
+    shopToggle.addEventListener("click", () => {
+      shop.style.display = shop.style.display === "flex" ? "none" : "flex";
+    });
   </script>
 
 </body>
