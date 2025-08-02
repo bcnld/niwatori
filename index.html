@@ -19,7 +19,18 @@
       100% { filter: brightness(0.3); }
     }
 
-    #startScreen {
+     img {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      object-fit: contain;
+      display: none;
+      animation: flash 0.1s infinite alternate; 
+    }
+    
+     #startScreen {
       color: white;
       text-align: center;
       padding-top: 40vh;
@@ -81,7 +92,7 @@
       const sound = document.getElementById("sound");
       const player = document.getElementById("player");
 
-      scream.volume = 0.6;
+      scream.volume = 1.0;
       bgm.volume = 1.0;
       sound.volume = 1.0;
 
@@ -117,7 +128,7 @@
         enemy.style.top = Math.random() * window.innerHeight + "px";
         document.body.appendChild(enemy);
         enemies.push(enemy);
-      }, 1000); // 1秒ごとに敵追加
+      }, 500); // 1秒ごとに敵追加
 
       // 敵がプレイヤーを追いかける
       setInterval(() => {
@@ -156,3 +167,4 @@
   </script>
 </body>
 </html>
+
