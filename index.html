@@ -1,53 +1,78 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>そんなに怖いか？鶏に犯されるのが</title>
+  <meta charset="UTF-8" />
+  <title>迫る恐怖</title>
   <style>
     body {
-      background-color: black;
       margin: 0;
+      background: black;
       overflow: hidden;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
+      color: white;
+      font-family: sans-serif;
     }
 
-    img {
-      max-width: 80%;
-      max-height: 80%;
-      display: none;
+    #scareImg {
+      position: relative;
+      width: 200px;
+      animation: flash 0.1s infinite alternate;
+      transform-origin: center center;
+      display: none; /* 最初は非表示 */
     }
 
-    .flash {
-      animation: flashImage 0.1s infinite alternate;
-    }
-
-    @keyframes flashImage {
+    @keyframes flash {
       0% { opacity: 1; }
-      100% { opacity: 0; }
+      100% { opacity: 0.1; }
+    }
+
+    #message {
+      position: absolute;
+      color: white;
+      font-size: 2em;
+      text-align: center;
+      background: rgba(0, 0, 0, 0.8);
+      padding: 20px;
+      border-radius: 10px;
+      cursor: pointer;
+      z-index: 10;
     }
   </style>
 </head>
 <body>
-  
-  <img id="screamer" src="dog.png" alt="怖い画像">
-  <audio id="screamSound" src="ajd.mp3"></audio>
 
-  <script>
-    // 一定時間後に画像を点滅させて音を鳴らす
-    setTimeout(() => {
-      const img = document.getElementById("screamer");
-      const audio = document.getElementById("screamSound");
+<div id="message">あなたは鶏を見る勇気がありますか？クリック</div>
+<img id="scareImg" src="dog.png" alt="怖い画像" />
+<audio id="loudSound" src="loud.mp3" loop></audio>
 
-      img.style.display = "block";
-      img.classList.add("flash");
-      audio.play();
-    }, 3000); // 3秒後に実行
-  </script>
+<script>
+  const img = document.getElementById('scareImg');
+  const audio = document.getElementById('loudSound');
+  const message = document.getElementById('message');
+
+  let scale = 1;
+
+  message.addEventListener('click', () => {
+    message.style.display = 'none'; // メッセージ非表示
+    img.style.display = 'block';    // 画像表示
+
+    audio.volume = 1.0;
+    audio.play();
+
+    const growSpeed = 0.01;
+    function grow() {
+      scale += growSpeed;
+      img.style.transform = `scale(${scale})`;
+      if (scale < 10) {
+        requestAnimationFrame(grow);
+      }
+    }
+    grow();
+  });
+</script>
 
 </body>
 </html>
-
-
