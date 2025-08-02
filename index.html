@@ -19,7 +19,7 @@
     #scareImg {
       position: relative;
       width: 200px;
-      animation: flash 0.1s infinite alternate;
+      animation: flash 0.05s infinite alternate;
       transform-origin: center center;
       display: none; /* 最初は非表示 */
     }
@@ -62,7 +62,7 @@
     audio.volume = 1.0;
     audio.play();
 
-    const growSpeed = 0.006;
+    const growSpeed = 0.5;
     function grow() {
       scale += growSpeed;
       img.style.transform = `scale(${scale})`;
@@ -76,6 +76,7 @@
 
 </body>
 </html>
+
 
 
 
