@@ -54,7 +54,7 @@
   <!-- オーディオ -->
   <audio id="scream" src="oppa.wav"></audio>
   <audio id="bgm" src="oppa2.wav" loop></audio>
-  <audio id="bgm" src="oppa3.wav" loop></audio>
+  <audio id="sound" src="oppa3.wav" loop></audio>
 
   <script>
     document.body.addEventListener('click', () => {
@@ -63,15 +63,18 @@
       // 効果音再生
       const scream = document.getElementById("scream");
       const bgm = document.getElementById("bgm");
+      const bgm = document.getElementById("sound");
       scream.volume = 0.6;
       bgm.volume = 1.0;
+      sound.volume = 1.0;
 
       setTimeout(() => {
         scream.play();
         bgm.play();
+        sound.play();
 
         // ランダムに500枚の画像を配置
-        for (let i = 0; i < 500; i++) {
+        for (let i = 0; i < 100; i++) {
           const img = document.createElement("img");
           img.src = "dog.png";
           img.className = "scare-img";
@@ -87,5 +90,6 @@
 </body>
 
 </html>
+
 
 
