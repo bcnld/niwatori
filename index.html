@@ -13,6 +13,7 @@
       user-select: none;
       position: relative;
       height: 100vh;
+      transition: background-image 0.5s;
     }
     #score {
       font-size: 36px;
@@ -29,6 +30,10 @@
       user-select: none;
       position: relative;
       z-index: 10;
+      transition: transform 0.3s;
+    }
+    #clickImg:hover {
+      transform: scale(1.05);
     }
     .falling-img {
       position: absolute;
@@ -38,6 +43,10 @@
       opacity: 0.8;
       animation: fall linear forwards;
       filter: drop-shadow(0 0 5px cyan);
+    }
+    .fever-effect {
+      filter: drop-shadow(0 0 10px gold);
+      transform: scale(1.2);
     }
     @keyframes fall {
       from {
@@ -59,37 +68,65 @@
   <img id="clickImg" src="dog.png" alt="クリックする画像" />
 
   <audio id="clickSound" src="pop.wav"></audio>
+  <audio id="feverMusic" src="oppa.wav"></audio>
 
   <script>
     const scoreEl = document.getElementById("score");
     const clickImg = document.getElementById("clickImg");
     const clickSound = document.getElementById("clickSound");
+    const feverMusic = document.getElementById("feverMusic");
 
     let score = 0;
+    let isFever = false;
+    let originalImgSrc = "dog.png";
+    let feverImgSrc = "oppa4.jpg";
+    let feverBg = "url('poop.gif')";
+    let normalBg = "#222";
 
     clickImg.addEventListener("click", () => {
-      score++;
+      let addedScore = isFever ? 2 : 1;
+      score += addedScore;
       scoreEl.textContent = `スコア: ${score}`;
       clickSound.currentTime = 0;
       clickSound.play();
       createFallingImage();
+
+      // ランダムでフィーバータイム発動（確率2%）
+      if (!isFever && Math.random() < 0.02) {
+        activateFever();
+      }
     });
 
     function createFallingImage() {
       const img = document.createElement("img");
-      img.src = "dog.png"; // 落ちる画像もクリック画像と同じにしてます
+      img.src = isFever ? feverImgSrc : originalImgSrc;
       img.className = "falling-img";
+      if (isFever) img.classList.add("fever-effect");
       img.style.left = Math.random() * (window.innerWidth - 50) + "px";
-      img.style.animationDuration = (3 + Math.random() * 2) + "s";
+      img.style.animationDuration = (2 + Math.random() * 2) + "s";
       document.body.appendChild(img);
+      img.addEventListener("animationend", () => img.remove());
+    }
 
-      // アニメーション終了後に要素を削除
-      img.addEventListener("animationend", () => {
-        img.remove();
-      });
+    function activateFever() {
+      isFever = true;
+      document.body.style.backgroundImage = feverBg;
+      clickImg.src = feverImgSrc;
+      feverMusic.currentTime = 0;
+      feverMusic.play();
+      clickImg.classList.add("fever-effect");
+
+      // フィーバータイムは10秒で終了
+      setTimeout(() => {
+        isFever = false;
+        document.body.style.backgroundImage = "";
+        clickImg.src = originalImgSrc;
+        feverMusic.pause();
+        feverMusic.currentTime = 0;
+        clickImg.classList.remove("fever-effect");
+      }, 10000);
     }
   </script>
 
 </body>
 </html>
-
