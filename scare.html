@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>安いもんだ、鶏でしこったことがばれたぐらい</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background-image: url('oppa4.jpg'); /* ← ここで画像指定 /
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-position: center;
+      animation: bgflash 0.2s infinite alternate; / ← 点滅アニメ追加 */
+    }
+
+    @keyframes bgflash {
+      0%   { filter: brightness(1); }
+      100% { filter: brightness(0.2); }
+    }
+
+    #startScreen {
+      color: white;
+      text-align: center;
+      padding-top: 40vh;
+      z-index: 1000;
+      position: relative;
+    }
+
+    .scare-img {
+      position: absolute;
+      width: 300px;
+      height: auto;
+      animation: move 3s linear infinite alternate, rainbow 1s infinite linear;
+      opacity: 0.8;
+    }
+
+    @keyframes move {
+      from { transform: translate(0, 0); }
+      to { transform: translate(500px, 500px); }
+    }
+
+    @keyframes rainbow {
+      0% { filter: hue-rotate(0deg); }
+      100% { filter: hue-rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div id="startScreen">
+    <h1>鶏を見る勇気がありますか？クリック</h1>
+  </div>
+
+  <!-- オーディオ -->
+  <audio id="scream" src="oppa.wav"></audio>
+  <audio id="bgm" src="oppa2.wav" loop></audio>
+  <audio id="bgm" src="oppa3.wav" loop></audio>
+
+  <script>
+    document.body.addEventListener('click', () => {
+      document.getElementById('startScreen').style.display = 'none';
+
+      // 効果音再生
+      const scream = document.getElementById("scream");
+      const bgm = document.getElementById("bgm");
+      scream.volume = 0.6;
+      bgm.volume = 1.0;
+
+      setTimeout(() => {
+        scream.play();
+        bgm.play();
+
+        // ランダムに100枚の画像を配置
+        for (let i = 0; i < 100; i++) {
+          const img = document.createElement("img");
+          img.src = "dog.png";
+          img.className = "scare-img";
+          img.style.left = Math.random() * window.innerWidth + "px";
+          img.style.top = Math.random() * window.innerHeight + "px";
+          img.style.animationDuration = (Math.random() * 3 + 2) + "s";
+          document.body.appendChild(img);
+        }
+
+      }, 2000);
+    });
+  </script>
+</body>
+</html>
