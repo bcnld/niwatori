@@ -47,21 +47,32 @@
       0% { filter: hue-rotate(0deg); }
       100% { filter: hue-rotate(360deg); }
     }
+
+    #captureVideo {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 2000;
+      display: none;
+    }
   </style>
 </head>
 <body>
   <div id="startScreen">
-    <h1>あなたは鶏から逃げる勇気がありますか？🥚</h1>
+    <h1>鶏を見る勇気がありますか？🥚🥚</h1>
   </div>
 
   <audio id="scream" src="oppa.wav"></audio>
   <audio id="bgm" src="oppa2.wav" loop></audio>
   <audio id="sound" src="oppa3.wav" loop></audio>
+  <video id="captureVideo" src="oppa4.mp4" autoplay></video>
 
   <img id="player" class="player" src="dog.png" style="display: none;" />
 
   <script>
     const enemies = [];
+    let gameRunning = true;
 
     document.body.addEventListener('click', () => {
       document.getElementById('startScreen').style.display = 'none';
@@ -80,7 +91,7 @@
 
       player.style.display = 'block';
 
-      // プレイヤーをマウス・タッチで追従させる
+      // プレイヤーをマウス・タッチで追従
       document.addEventListener("mousemove", (e) => {
         movePlayer(e.clientX, e.clientY);
       });
@@ -96,8 +107,9 @@
         player.style.top = (y - 30) + "px";
       }
 
-      // 敵をどんどん増やす
+      // 敵を追加
       setInterval(() => {
+        if (!gameRunning) return;
         const enemy = document.createElement("img");
         enemy.src = "dog.png";
         enemy.className = "enemy";
@@ -105,23 +117,41 @@
         enemy.style.top = Math.random() * window.innerHeight + "px";
         document.body.appendChild(enemy);
         enemies.push(enemy);
-      }, 500); // 0.5秒ごとに敵を追加
+      }, 1000); // 1秒ごとに敵追加
 
-      // 敵がプレイヤーから逃げる動き
+      // 敵がプレイヤーを追いかける
       setInterval(() => {
+        if (!gameRunning) return;
         const playerX = player.offsetLeft + 30;
         const playerY = player.offsetTop + 30;
 
         enemies.forEach(enemy => {
-          const dx = enemy.offsetLeft + 40 - playerX;
-          const dy = enemy.offsetTop + 40 - playerY;
+          const dx = playerX - (enemy.offsetLeft + 40);
+          const dy = playerY - (enemy.offsetTop + 40);
           const dist = Math.sqrt(dx * dx + dy * dy);
-          const moveX = (dx / dist) * 5;
-          const moveY = (dy / dist) * 5;
+          const moveX = (dx / dist) * 2;
+          const moveY = (dy / dist) * 2;
           enemy.style.left = (enemy.offsetLeft + moveX) + "px";
           enemy.style.top = (enemy.offsetTop + moveY) + "px";
+
+          // 捕まったか確認
+          if (Math.abs(dx) < 40 && Math.abs(dy) < 40) {
+            gameOver();
+          }
         });
       }, 30);
+
+      function gameOver() {
+        if (!gameRunning) return;
+        gameRunning = false;
+
+        bgm.pause();
+        sound.pause();
+
+        const video = document.getElementById("captureVideo");
+        video.style.display = "block";
+        video.play();
+      }
     });
   </script>
 </body>
