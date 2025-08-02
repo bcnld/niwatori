@@ -1,86 +1,71 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>そんなに怖いか？鶏に犯されるのが</title>
   <style>
     body {
       margin: 0;
-      background: black;
+      background-color: black;
       overflow: hidden;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      color: white;
-      font-family: sans-serif;
     }
 
-    #scareImg {
-      position: relative;
-      width: 200px;
-      animation: flash 0.05s infinite alternate;
-      transform-origin: center center;
-      display: none; /* 最初は非表示 */
-    }
-
-    @keyframes flash {
-      0% { opacity: 1; }
-      100% { opacity: 8.5; }
-    }
-
-    #message {
+    #startButton {
       position: absolute;
-      color: white;
-      font-size: 2em;
-      text-align: center;
-      background: rgba(0, 0, 0, 0.8);
-      padding: 20px;
-      border-radius: 10px;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      padding: 20px 40px;
+      font-size: 24px;
       cursor: pointer;
       z-index: 10;
+    }
+
+    .img-tile {
+      position: absolute;
+      width: 100px;
+      height: 100px;
     }
   </style>
 </head>
 <body>
 
-<div id="message">あなたは鶏を見る勇気がありますか？🐔👨クリック</div>
-<img id="scareImg" src="dog.png" alt="怖い画像" />
-<audio id="loudSound" src="oppai.mp3" loop></audio>
+  <button id="startButton">スタート</button>
+  <audio id="sound" src="sound.wav"></audio>
 
-<script>
-  const img = document.getElementById('scareImg');
-  const audio = document.getElementById('loudSound');
-  const message = document.getElementById('message');
+  <script>
+    const button = document.getElementById("startButton");
+    const sound = document.getElementById("sound");
 
-  let scale = 1;
+    button.addEventListener("click", () => {
+      button.style.display = "none";
+      sound.play();
+      fillScreenWithImages();
+    });
 
-  message.addEventListener('click', () => {
-    message.style.display = 'none'; // メッセージ非表示
-    img.style.display = 'block';    // 画像表示
+    function fillScreenWithImages() {
+      const imgSize = 100; // 画像のサイズ（px）
+      const cols = Math.ceil(window.innerWidth / imgSize);
+      const rows = Math.ceil(window.innerHeight / imgSize);
+      let count = 0;
 
-    audio.volume = 1.0;
-    audio.play();
+      const interval = setInterval(() => {
+        const col = count % cols;
+        const row = Math.floor(count / cols);
+        const img = document.createElement("img");
+        img.src = "dog.png";
+        img.className = "img-tile";
+        img.style.left = `${col * imgSize}px`;
+        img.style.top = `${row * imgSize}px`;
+        document.body.appendChild(img);
 
-    const growSpeed = 1.0;
-    function grow() {
-      scale += growSpeed;
-      img.style.transform = `scale(${scale})`;
-      if (scale < 10) {
-        requestAnimationFrame(grow);
-      }
+        count++;
+        if (count >= cols * rows) {
+          clearInterval(interval);
+        }
+      }, 50); // 画像の表示間隔（ms）
     }
-    grow();
-  });
-</script>
+  </script>
 
 </body>
 </html>
-
-
-
-
-
-
-
-
