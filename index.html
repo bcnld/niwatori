@@ -37,7 +37,7 @@
 
     @keyframes move {
       from { transform: translate(0, 0); }
-      to { transform: translate(50px, 50px); }
+      to { transform: translate(500px, 500px); }
     }
 
     @keyframes rainbow {
@@ -48,7 +48,7 @@
 </head>
 <body>
   <div id="startScreen">
-    <h1>鶏を見る勇気がありますか？</h1>
+    <h1>鶏を見る勇気がありますか？クリック</h1>
   </div>
 
   <!-- オーディオ -->
@@ -63,17 +63,16 @@
       // 効果音再生
       const scream = document.getElementById("scream");
       const bgm = document.getElementById("bgm");
-      const bgm = document.getElementById("sound");
       scream.volume = 0.6;
       bgm.volume = 1.0;
       sound.volume = 1.0;
-
+      
       setTimeout(() => {
         scream.play();
         bgm.play();
         sound.play();
-
-        // ランダムに500枚の画像を配置
+        
+        // ランダムに100枚の画像を配置
         for (let i = 0; i < 100; i++) {
           const img = document.createElement("img");
           img.src = "dog.png";
@@ -88,9 +87,4 @@
     });
   </script>
 </body>
-
 </html>
-
-
-
-
