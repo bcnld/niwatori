@@ -2,42 +2,45 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>安いもんだ、鶏でしこったことがばれたぐらい</title>
+  <title>そんなに怖いか？鶏に犯されるのが</title>
   <style>
     body {
       margin: 0;
       overflow: hidden;
-      background-image: url('oppa4.jpg'); /* ← ここで画像指定 /
+      background-image: url('oppa4.jpg');
       background-size: cover;
       background-repeat: no-repeat;
       background-position: center;
-      animation: bgflash 0.2s infinite alternate; / ← 点滅アニメ追加 */
+      animation: bgflash 0.2s infinite alternate;
     }
 
     @keyframes bgflash {
-      0%   { filter: brightness(1); }
-      100% { filter: brightness(0.2); }
+      0% { filter: brightness(1); }
+      100% { filter: brightness(0.3); }
     }
 
     #startScreen {
       color: white;
       text-align: center;
       padding-top: 40vh;
-      z-index: 1000;
       position: relative;
+      z-index: 1000;
     }
 
-    .scare-img {
+    .enemy {
       position: absolute;
-      width: 300px;
+      width: 80px;
       height: auto;
-      animation: move 3s linear infinite alternate, rainbow 1s infinite linear;
-      opacity: 0.8;
+      animation: rainbow 2s infinite linear;
+      pointer-events: none;
     }
 
-    @keyframes move {
-      from { transform: translate(0, 0); }
-      to { transform: translate(500px, 500px); }
+    .player {
+      position: absolute;
+      width: 60px;
+      height: auto;
+      z-index: 999;
+      pointer-events: none;
     }
 
     @keyframes rainbow {
@@ -48,42 +51,77 @@
 </head>
 <body>
   <div id="startScreen">
-    <h1>鶏を見る勇気がありますか？クリック</h1>
+    <h1>あなたは鶏から逃げる勇気がありますか？🥚</h1>
   </div>
 
-  <!-- オーディオ -->
   <audio id="scream" src="oppa.wav"></audio>
   <audio id="bgm" src="oppa2.wav" loop></audio>
   <audio id="sound" src="oppa3.wav" loop></audio>
 
+  <img id="player" class="player" src="dog.png" style="display: none;" />
+
   <script>
+    const enemies = [];
+
     document.body.addEventListener('click', () => {
       document.getElementById('startScreen').style.display = 'none';
-
-      // 効果音再生
       const scream = document.getElementById("scream");
       const bgm = document.getElementById("bgm");
+      const sound = document.getElementById("sound");
+      const player = document.getElementById("player");
+
       scream.volume = 0.6;
       bgm.volume = 1.0;
       sound.volume = 1.0;
-      
-      setTimeout(() => {
-        scream.play();
-        bgm.play();
-        sound.play();
-        
-        // ランダムに100枚の画像を配置
-        for (let i = 0; i < 100; i++) {
-          const img = document.createElement("img");
-          img.src = "dog.png";
-          img.className = "scare-img";
-          img.style.left = Math.random() * window.innerWidth + "px";
-          img.style.top = Math.random() * window.innerHeight + "px";
-          img.style.animationDuration = (Math.random() * 3 + 2) + "s";
-          document.body.appendChild(img);
-        }
 
-      }, 2000);
+      scream.play();
+      bgm.play();
+      sound.play();
+
+      player.style.display = 'block';
+
+      // プレイヤーをマウス・タッチで追従させる
+      document.addEventListener("mousemove", (e) => {
+        movePlayer(e.clientX, e.clientY);
+      });
+      document.addEventListener("touchmove", (e) => {
+        if (e.touches.length > 0) {
+          const touch = e.touches[0];
+          movePlayer(touch.clientX, touch.clientY);
+        }
+      });
+
+      function movePlayer(x, y) {
+        player.style.left = (x - 30) + "px";
+        player.style.top = (y - 30) + "px";
+      }
+
+      // 敵をどんどん増やす
+      setInterval(() => {
+        const enemy = document.createElement("img");
+        enemy.src = "dog.png";
+        enemy.className = "enemy";
+        enemy.style.left = Math.random() * window.innerWidth + "px";
+        enemy.style.top = Math.random() * window.innerHeight + "px";
+        document.body.appendChild(enemy);
+        enemies.push(enemy);
+      }, 500); // 0.5秒ごとに敵を追加
+
+      // 敵がプレイヤーから逃げる動き
+      setInterval(() => {
+        const playerX = player.offsetLeft + 30;
+        const playerY = player.offsetTop + 30;
+
+        enemies.forEach(enemy => {
+          const dx = enemy.offsetLeft + 40 - playerX;
+          const dy = enemy.offsetTop + 40 - playerY;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          const moveX = (dx / dist) * 5;
+          const moveY = (dy / dist) * 5;
+          enemy.style.left = (enemy.offsetLeft + moveX) + "px";
+          enemy.style.top = (enemy.offsetTop + moveY) + "px";
+        });
+      }, 30);
     });
   </script>
 </body>
