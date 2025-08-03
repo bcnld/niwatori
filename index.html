@@ -187,7 +187,7 @@
 
     function updateUI() {
       scoreEl.textContent = `にわとりスコア: ${score}`;
-      document.getElementById("clickCost").textContent = 50;
+      document.getElementById("clickCost").textContent = 10000;
       document.getElementById("autoLevel").textContent = autoClickLevel;
       document.getElementById("autoCost").textContent = 100 + autoClickLevel * 200;
       document.getElementById("feverChanceText").textContent = (0.1 + feverChanceBoost * 100).toFixed(1) + "%";
@@ -203,7 +203,7 @@
     }
 
     function buyUpgrade() {
-      const cost = 50;
+      const cost = 10000;
       if (score >= cost) {
         score -= cost;
         clickPower += 1;
@@ -265,3 +265,4 @@
 
 </body>
 </html>
+
