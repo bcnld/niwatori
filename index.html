@@ -1,220 +1,267 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, user-scalable=no">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>そんなに怖いか？鶏に犯されるのが</title>
   <style>
     body {
       margin: 0;
-      font-family: sans-serif;
+      overflow: hidden;
       background: #222;
       color: white;
-      overflow: hidden;
-      touch-action: manipulation;
+      font-family: Arial, sans-serif;
+      user-select: none;
+      height: 100vh;
     }
-    #count {
-      font-size: 32px;
+    #score {
+      font-size: 36px;
+      text-align: center;
+      margin: 20px 0;
+      z-index: 10;
+      position: relative;
+    }
+    #feverText {
+      text-align: center;
+      font-size: 48px;
+      color: gold;
+      font-weight: bold;
+      display: none;
+    }
+    #clickImg {
+      display: block;
+      margin: 0 auto;
+      width: 200px;
+      cursor: pointer;
+      z-index: 10;
+      transition: transform 0.3s;
+    }
+    #clickImg:hover {
+      transform: scale(1.05);
+    }
+    .falling-img {
+      position: absolute;
+      width: 50px;
+      pointer-events: none;
+      opacity: 0.8;
+      animation: fall linear forwards;
+      filter: drop-shadow(0 0 5px cyan);
+    }
+    .fever-effect {
+      filter: drop-shadow(0 0 10px gold);
+      transform: scale(1.2);
+    }
+    @keyframes fall {
+      from {
+        top: -60px;
+        opacity: 1;
+        transform: rotate(0deg);
+      }
+      to {
+        top: 110vh;
+        opacity: 0;
+        transform: rotate(360deg);
+      }
+    }
+    #shopToggle {
       position: fixed;
       top: 20px;
-      left: 20px;
-      background: rgba(0,0,0,0.5);
-      padding: 5px 10px;
-      border-radius: 10px;
-    }
-    #clickButton {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      padding: 30px;
-      font-size: 24px;
-      background: #333;
-      color: white;
-      border: none;
-      border-radius: 15px;
-    }
-    #shopToggle, #resetBtn {
-      position: fixed;
-      top: 20px;
-      padding: 10px;
+      right: 20px;
+      z-index: 20;
       background: #444;
-      color: white;
+      padding: 10px;
       border: none;
-      border-radius: 8px;
+      color: white;
+      cursor: pointer;
     }
-    #shopToggle { right: 20px; }
-    #resetBtn { right: 120px; }
-
     #shop {
       position: fixed;
-      top: 70px;
-      right: 20px;
-      background: rgba(0, 0, 0, 0.85);
-      padding: 10px;
+      top: 0;
+      right: 0;
+      width: 300px;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.8);
+      padding: 20px;
       display: none;
-      border-radius: 10px;
-      width: 240px;
-      max-height: 60vh;
-      overflow-y: auto;
+      flex-direction: column;
+      z-index: 15;
     }
     .shop-item {
-      margin-bottom: 12px;
-    }
-    .drop {
-      position: absolute;
-      top: -50px;
-      width: 50px;
-      height: 50px;
-      pointer-events: none;
-    }
-    #feverMessage {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 36px;
-      color: yellow;
-      text-shadow: 2px 2px 10px red;
-      display: none;
-      z-index: 10;
+      margin: 10px 0;
+      background: #333;
+      padding: 10px;
+      border-radius: 5px;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
-  <div id="count">0</div>
-  <button id="clickButton">クリック</button>
-  <button id="shopToggle">鶏ショップ🐔</button>
-  <button id="resetBtn">リセット</button>
-  <div id="shop">
-    <div class="shop-item">
-      自動クリック Lv.<span id="autoClickLevel">0</span><br>
-      消費: <span id="autoClickCost">100</span>pt<br>
-      <button onclick="upgradeAutoClick()">購入</button>
-    </div>
-    <div class="shop-item">
-      フィーバー確率: <span id="feverChance">0.1</span>%<br>
-      消費: 1000pt<br>
-      <button onclick="upgradeFever()">購入</button>
-    </div>
-  </div>
-  <div id="feverMessage">🐔POOP TIME🐔!</div>
 
-  <audio id="clickSound" src="pop.mp3"></audio>
+  <div id="score">スコア: 0</div>
+  <div id="feverText">🐔 POOP TIME!! 🐔</div>
+  <img id="clickImg" src="dog.png" alt="クリックする画像" />
+  <button id="shopToggle">ショップ</button>
+
+  <div id="shop">
+    <div class="shop-item" onclick="buyUpgrade()">クリック強化（+1）<br>コスト: <span id="clickCost">10000</span></div>
+    <div class="shop-item" onclick="buyAutoClick()">自動クリック<br>レベル: <span id="autoLevel">0</span><br>コスト: <span id="autoCost">100</span></div>
+    <div class="shop-item" onclick="buyFeverBoost()">フィーバー確率強化<br>+0.1%（1000pt）<br>現在: <span id="feverChanceText">0.1%</span></div>
+    <div class="shop-item" onclick="buySoundBoost()">クリック音ピッチUP<br>現在: <span id="soundPitchText">1.0</span></div>
+  </div>
+
+  <audio id="clickSound" src="pop.wav"></audio>
+  <audio id="feverMusic" src="oppa.wav" loop></audio>
   <audio id="shopSound" src="ahh.mp3"></audio>
 
   <script>
-    let count = parseInt(localStorage.getItem("count") || "0");
-    let autoClickLevel = parseInt(localStorage.getItem("autoClickLevel") || "0");
-    let feverChance = parseFloat(localStorage.getItem("feverChance") || "0.1");
-    let autoClickCost = 100 + 200 * autoClickLevel;
-
-    const countEl = document.getElementById("count");
+    const scoreEl = document.getElementById("score");
+    const feverText = document.getElementById("feverText");
+    const clickImg = document.getElementById("clickImg");
     const clickSound = document.getElementById("clickSound");
+    const feverMusic = document.getElementById("feverMusic");
     const shopSound = document.getElementById("shopSound");
-    const autoClickLevelEl = document.getElementById("autoClickLevel");
-    const autoClickCostEl = document.getElementById("autoClickCost");
-    const feverChanceEl = document.getElementById("feverChance");
-    const feverMessage = document.getElementById("feverMessage");
+
+    const shopToggle = document.getElementById("shopToggle");
+    const shop = document.getElementById("shop");
+
+    let score = parseInt(localStorage.getItem("score")) || 0;
+    let clickPower = parseInt(localStorage.getItem("clickPower")) || 1;
+    let autoClickLevel = parseInt(localStorage.getItem("autoClickLevel")) || 0;
+    let feverChanceBoost = parseFloat(localStorage.getItem("feverChanceBoost")) || 0;
+    let soundPitch = parseFloat(localStorage.getItem("soundPitch")) || 1.0;
+
+    let isFever = false;
+
+    const originalImgSrc = "dog.png";
+    const feverImgSrc = "oppa4.jpg";
+    const feverBg = "url('poop.gif')";
+
+    updateUI();
+
+    clickImg.addEventListener("click", () => {
+      score += isFever ? clickPower * 2 : clickPower;
+      updateUI();
+      saveData();
+      clickSound.pause();
+      clickSound.currentTime = 0;
+      clickSound.playbackRate = soundPitch;
+      clickSound.play();
+      createFallingImage();
+
+      const baseChance = 0.001 + feverChanceBoost;
+      if (!isFever && Math.random() < baseChance) {
+        activateFever();
+      }
+    });
+
+    function createFallingImage() {
+      const img = document.createElement("img");
+      img.src = isFever ? feverImgSrc : originalImgSrc;
+      img.className = "falling-img";
+      if (isFever) img.classList.add("fever-effect");
+      img.style.left = Math.random() * (window.innerWidth - 50) + "px";
+      img.style.animationDuration = (2 + Math.random() * 2) + "s";
+      document.body.appendChild(img);
+      img.addEventListener("animationend", () => img.remove());
+    }
+
+    function activateFever() {
+      isFever = true;
+      feverText.style.display = "block";
+      document.body.style.backgroundImage = feverBg;
+      clickImg.src = feverImgSrc;
+      clickImg.classList.add("fever-effect");
+      feverMusic.currentTime = 0;
+      feverMusic.play();
+
+      setTimeout(() => {
+        isFever = false;
+        feverText.style.display = "none";
+        document.body.style.backgroundImage = "";
+        clickImg.src = originalImgSrc;
+        clickImg.classList.remove("fever-effect");
+        feverMusic.pause();
+        feverMusic.currentTime = 0;
+      }, 10000);
+    }
 
     function updateUI() {
-      countEl.textContent = count;
-      autoClickLevelEl.textContent = autoClickLevel;
-      autoClickCostEl.textContent = autoClickCost;
-      feverChanceEl.textContent = feverChance.toFixed(1);
+      scoreEl.textContent = `スコア: ${score}`;
+      document.getElementById("clickCost").textContent = 10000;
+      document.getElementById("autoLevel").textContent = autoClickLevel;
+      document.getElementById("autoCost").textContent = 100 + autoClickLevel * 200;
+      document.getElementById("feverChanceText").textContent = (0.1 + feverChanceBoost * 100).toFixed(1) + "%";
+      document.getElementById("soundPitchText").textContent = soundPitch.toFixed(1);
     }
 
     function saveData() {
-      localStorage.setItem("count", count);
+      localStorage.setItem("score", score);
+      localStorage.setItem("clickPower", clickPower);
       localStorage.setItem("autoClickLevel", autoClickLevel);
-      localStorage.setItem("feverChance", feverChance);
+      localStorage.setItem("feverChanceBoost", feverChanceBoost);
+      localStorage.setItem("soundPitch", soundPitch);
     }
 
-    document.getElementById("clickButton").onclick = () => {
-      count++;
-      playClickSound();
-      dropImage();
-      if (Math.random() < feverChance / 100) {
-        count += 10;
-        showFever();
-      }
-      updateUI();
-      saveData();
-    };
-
-    function dropImage() {
-      const img = document.createElement("img");
-      img.src = "dog.png";
-      img.className = "drop";
-      img.style.left = Math.random() * window.innerWidth + "px";
-      document.body.appendChild(img);
-      let y = -50;
-      const fall = setInterval(() => {
-        y += 5;
-        img.style.top = y + "px";
-        if (y > window.innerHeight) {
-          img.remove();
-          clearInterval(fall);
-        }
-      }, 16);
-    }
-
-    function showFever() {
-      feverMessage.style.display = "block";
-      setTimeout(() => {
-        feverMessage.style.display = "none";
-      }, 1000);
-    }
-
-    function playClickSound() {
-      clickSound.currentTime = 0;
-      clickSound.play();
-    }
-
-    function upgradeAutoClick() {
-      if (count >= autoClickCost && autoClickLevel < 1000) {
-        count -= autoClickCost;
-        autoClickLevel++;
-        autoClickCost = 100 + 200 * autoClickLevel;
-        shopSound.currentTime = 0;
-        shopSound.play();
+    function buyUpgrade() {
+      const cost = 10000;
+      if (score >= cost) {
+        score -= cost;
+        clickPower += 1;
         updateUI();
         saveData();
+        alert("アップグレードしました！");
+      } else {
+        alert("鶏が足りません！");
       }
     }
 
-    function upgradeFever() {
-      if (count >= 1000) {
-        count -= 1000;
-        feverChance += 0.1;
-        shopSound.currentTime = 0;
-        shopSound.play();
+    function buyAutoClick() {
+      const cost = 100 + autoClickLevel * 200;
+      if (score >= cost && autoClickLevel < 1000) {
+        score -= cost;
+        autoClickLevel += 1;
         updateUI();
         saveData();
+      } else {
+        alert("鶏が満たされていません！");
       }
     }
 
+    function buyFeverBoost() {
+      if (score >= 1000) {
+        score -= 1000;
+        feverChanceBoost += 0.001;
+        updateUI();
+        saveData();
+      } else {
+        alert("鶏が足りません！");
+      }
+    }
+
+    function buySoundBoost() {
+      if (score >= 100) {
+        score -= 100;
+        soundPitch += 0.1;
+        updateUI();
+        saveData();
+      } else {
+        alert("鶏が足りません！");
+      }
+    }
+
+    shopToggle.addEventListener("click", () => {
+      shop.style.display = shop.style.display === "flex" ? "none" : "flex";
+      shopSound.currentTime = 0;
+      shopSound.play();
+    });
+
+    // 自動クリック実行
     setInterval(() => {
-      count += autoClickLevel;
+      score += autoClickLevel;
       updateUI();
       saveData();
     }, 1000);
-
-    document.getElementById("shopToggle").onclick = () => {
-      const shop = document.getElementById("shop");
-      shop.style.display = shop.style.display === "none" ? "block" : "none";
-      shopSound.currentTime = 0;
-      shopSound.play();
-    };
-
-    document.getElementById("resetBtn").onclick = () => {
-      if (confirm("すべてのデータをにわとりにしますか？この操作は全てにわとりになります。")) {
-        localStorage.clear();
-        location.reload();
-      }
-    };
-
-    updateUI();
   </script>
+
 </body>
 </html>
