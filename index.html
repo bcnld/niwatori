@@ -2,6 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>そんなに怖いか？鶏に犯されるのが</title>
   <style>
     body {
@@ -19,6 +20,13 @@
       margin: 20px 0;
       z-index: 10;
       position: relative;
+    }
+    #feverText {
+      text-align: center;
+      font-size: 48px;
+      color: gold;
+      font-weight: bold;
+      display: none;
     }
     #clickImg {
       display: block;
@@ -90,44 +98,58 @@
 <body>
 
   <div id="score">スコア: 0</div>
+  <div id="feverText">🐔 POOP TIME!! 🐔</div>
   <img id="clickImg" src="dog.png" alt="クリックする画像" />
-  <button id="shopToggle">ショップ</button>
+  <button id="shopToggle">🐔鶏ショップ🐔</button>
 
   <div id="shop">
-    <div class="shop-item" onclick="buyUpgrade()">アップグレード (+1点)</div>
+    <div class="shop-item" onclick="buyUpgrade()">クリック強化（+1）<br>コスト: <span id="clickCost">10000</span></div>
+    <div class="shop-item" onclick="buyAutoClick()">自動クリック<br>レベル: <span id="autoLevel">0</span><br>コスト: <span id="autoCost">100</span></div>
+    <div class="shop-item" onclick="buyFeverBoost()">フィーバー確率強化<br>+0.1%（1000pt）<br>現在: <span id="feverChanceText">0.1%</span></div>
+    <div class="shop-item" onclick="buySoundBoost()">クリック音ピッチUP<br>現在: <span id="soundPitchText">1.0</span></div>
   </div>
 
   <audio id="clickSound" src="pop.wav"></audio>
   <audio id="feverMusic" src="oppa.wav" loop></audio>
+  <audio id="shopSound" src="oppi.wav"></audio>
 
   <script>
     const scoreEl = document.getElementById("score");
+    const feverText = document.getElementById("feverText");
     const clickImg = document.getElementById("clickImg");
     const clickSound = document.getElementById("clickSound");
     const feverMusic = document.getElementById("feverMusic");
+    const shopSound = document.getElementById("shopSound");
+
     const shopToggle = document.getElementById("shopToggle");
     const shop = document.getElementById("shop");
 
     let score = parseInt(localStorage.getItem("score")) || 0;
     let clickPower = parseInt(localStorage.getItem("clickPower")) || 1;
+    let autoClickLevel = parseInt(localStorage.getItem("autoClickLevel")) || 0;
+    let feverChanceBoost = parseFloat(localStorage.getItem("feverChanceBoost")) || 0;
+    let soundPitch = parseFloat(localStorage.getItem("soundPitch")) || 1.0;
+
     let isFever = false;
 
     const originalImgSrc = "dog.png";
     const feverImgSrc = "oppa4.jpg";
     const feverBg = "url('poop.gif')";
 
-    updateScore();
+    updateUI();
 
     clickImg.addEventListener("click", () => {
       score += isFever ? clickPower * 2 : clickPower;
-      updateScore();
+      updateUI();
       saveData();
+      clickSound.pause();
       clickSound.currentTime = 0;
+      clickSound.playbackRate = soundPitch;
       clickSound.play();
       createFallingImage();
 
-      const feverChance = 0.001 + Math.floor(score / 1000) * 0.001;
-      if (!isFever && Math.random() < feverChance) {
+      const baseChance = 0.001 + feverChanceBoost;
+      if (!isFever && Math.random() < baseChance) {
         activateFever();
       }
     });
@@ -145,6 +167,7 @@
 
     function activateFever() {
       isFever = true;
+      feverText.style.display = "block";
       document.body.style.backgroundImage = feverBg;
       clickImg.src = feverImgSrc;
       clickImg.classList.add("fever-effect");
@@ -153,6 +176,7 @@
 
       setTimeout(() => {
         isFever = false;
+        feverText.style.display = "none";
         document.body.style.backgroundImage = "";
         clickImg.src = originalImgSrc;
         clickImg.classList.remove("fever-effect");
@@ -161,13 +185,21 @@
       }, 10000);
     }
 
-    function updateScore() {
-      scoreEl.textContent = `スコア: ${score}`;
+    function updateUI() {
+      scoreEl.textContent = `にわとりスコア: ${score}`;
+      document.getElementById("clickCost").textContent = 50;
+      document.getElementById("autoLevel").textContent = autoClickLevel;
+      document.getElementById("autoCost").textContent = 100 + autoClickLevel * 200;
+      document.getElementById("feverChanceText").textContent = (0.1 + feverChanceBoost * 100).toFixed(1) + "%";
+      document.getElementById("soundPitchText").textContent = soundPitch.toFixed(1);
     }
 
     function saveData() {
       localStorage.setItem("score", score);
       localStorage.setItem("clickPower", clickPower);
+      localStorage.setItem("autoClickLevel", autoClickLevel);
+      localStorage.setItem("feverChanceBoost", feverChanceBoost);
+      localStorage.setItem("soundPitch", soundPitch);
     }
 
     function buyUpgrade() {
@@ -175,17 +207,60 @@
       if (score >= cost) {
         score -= cost;
         clickPower += 1;
-        updateScore();
+        updateUI();
         saveData();
-        alert("アップグレードしました！ クリックあたり +1 点");
+        alert("アップグレードしました！");
       } else {
-        alert("スコアが足りません！");
+        alert("鶏が足りません！");
+      }
+    }
+
+    function buyAutoClick() {
+      const cost = 100 + autoClickLevel * 200;
+      if (score >= cost && autoClickLevel < 1000) {
+        score -= cost;
+        autoClickLevel += 1;
+        updateUI();
+        saveData();
+      } else {
+        alert("鶏が満たされていません！🐔");
+      }
+    }
+
+    function buyFeverBoost() {
+      if (score >= 1000) {
+        score -= 1000;
+        feverChanceBoost += 0.001;
+        updateUI();
+        saveData();
+      } else {
+        alert("鶏が足りません！");
+      }
+    }
+
+    function buySoundBoost() {
+      if (score >= 100) {
+        score -= 100;
+        soundPitch += 0.1;
+        updateUI();
+        saveData();
+      } else {
+        alert("鶏が足りません！");
       }
     }
 
     shopToggle.addEventListener("click", () => {
       shop.style.display = shop.style.display === "flex" ? "none" : "flex";
+      shopSound.currentTime = 0;
+      shopSound.play();
     });
+
+    // 自動クリック実行
+    setInterval(() => {
+      score += autoClickLevel;
+      updateUI();
+      saveData();
+    }, 1000);
   </script>
 
 </body>
