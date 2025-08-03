@@ -74,17 +74,29 @@
       color: white;
       cursor: pointer;
     }
+    #resetButton {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      z-index: 20;
+      background: #c33;
+      padding: 10px;
+      border: none;
+      color: white;
+      cursor: pointer;
+    }
     #shop {
       position: fixed;
       top: 0;
       right: 0;
       width: 300px;
-      height: 100vh;
-      background: rgba(0, 0, 0, 0.8);
+      height: auto;
+      background: rgba(0, 0, 0, 0.85);
       padding: 20px;
       display: none;
       flex-direction: column;
       z-index: 15;
+      touch-action: none;
     }
     .shop-item {
       margin: 10px 0;
@@ -101,6 +113,7 @@
   <div id="feverText">🐔 POOP TIME!! 🐔</div>
   <img id="clickImg" src="dog.png" alt="クリックする画像" />
   <button id="shopToggle">ショップ</button>
+  <button id="resetButton">にわとり</button>
 
   <div id="shop">
     <div class="shop-item" onclick="buyUpgrade()">クリック強化（+1）<br>コスト: <span id="clickCost">10000</span></div>
@@ -112,6 +125,7 @@
   <audio id="clickSound" src="pop.wav"></audio>
   <audio id="feverMusic" src="oppa.wav" loop></audio>
   <audio id="shopSound" src="ahh.mp3"></audio>
+  <audio id="upgradeSound" src="kan.mp3"></audio>
 
   <script>
     const scoreEl = document.getElementById("score");
@@ -120,9 +134,11 @@
     const clickSound = document.getElementById("clickSound");
     const feverMusic = document.getElementById("feverMusic");
     const shopSound = document.getElementById("shopSound");
+    const upgradeSound = document.getElementById("upgradeSound");
 
     const shopToggle = document.getElementById("shopToggle");
     const shop = document.getElementById("shop");
+    const resetButton = document.getElementById("resetButton");
 
     let score = parseInt(localStorage.getItem("score")) || 0;
     let clickPower = parseInt(localStorage.getItem("clickPower")) || 1;
@@ -207,6 +223,8 @@
       if (score >= cost) {
         score -= cost;
         clickPower += 1;
+        upgradeSound.currentTime = 0;
+        upgradeSound.play();
         updateUI();
         saveData();
         alert("アップグレードしました！");
@@ -220,6 +238,8 @@
       if (score >= cost && autoClickLevel < 1000) {
         score -= cost;
         autoClickLevel += 1;
+        upgradeSound.currentTime = 0;
+        upgradeSound.play();
         updateUI();
         saveData();
       } else {
@@ -231,6 +251,8 @@
       if (score >= 1000) {
         score -= 1000;
         feverChanceBoost += 0.001;
+        upgradeSound.currentTime = 0;
+        upgradeSound.play();
         updateUI();
         saveData();
       } else {
@@ -242,6 +264,8 @@
       if (score >= 100) {
         score -= 100;
         soundPitch += 0.1;
+        upgradeSound.currentTime = 0;
+        upgradeSound.play();
         updateUI();
         saveData();
       } else {
@@ -255,12 +279,39 @@
       shopSound.play();
     });
 
-    // 自動クリック実行
+    resetButton.addEventListener("click", () => {
+      if (confirm("鶏にしますか？")) {
+        localStorage.clear();
+        location.reload();
+      }
+    });
+
+    // 自動クリック処理
     setInterval(() => {
       score += autoClickLevel;
       updateUI();
       saveData();
     }, 1000);
+
+    // ドラッグでショップを動かす
+    let isDragging = false, offsetX = 0, offsetY = 0;
+
+    shop.addEventListener("touchstart", e => {
+      isDragging = true;
+      const rect = shop.getBoundingClientRect();
+      offsetX = e.touches[0].clientX - rect.left;
+      offsetY = e.touches[0].clientY - rect.top;
+    });
+
+    shop.addEventListener("touchmove", e => {
+      if (isDragging) {
+        shop.style.left = (e.touches[0].clientX - offsetX) + "px";
+        shop.style.top = (e.touches[0].clientY - offsetY) + "px";
+        shop.style.right = "auto";
+      }
+    });
+
+    shop.addEventListener("touchend", () => isDragging = false);
   </script>
 
 </body>
